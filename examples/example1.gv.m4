@@ -23,9 +23,9 @@ sg_begin()
   sg_reference(ERR_IO, Error)
       
   sg_state(RESET, Reset, 
-    sg_attr(GetPath, "")
-    sg_attr(GetName, "")
-    sg_attr(CheckError, 0))  
+    sg_prop(GetPath, "")
+    sg_prop(GetName, "")
+    sg_prop(CheckError, 0))  
     
   sg_process(RESET_1, "Allocate a new handle\non the heap.")
   
@@ -35,14 +35,14 @@ sg_begin()
     "Define the handle's path either from\nan integer index or an explicit path.")
   
   sg_state(PREPARED_INDEX, Prepared (From Index), 
-    sg_attr(GetPath, "/dev/hidraw{N}")  
-    sg_attr(GetName, "")
-    sg_attr(CheckError, 0))
+    sg_prop(GetPath, "/dev/hidraw{N}")  
+    sg_prop(GetName, "")
+    sg_prop(CheckError, 0))
     
   sg_state(PREPARED_PATH, Prepared (From Path), 
-    sg_attr(GetPath, "{PATH}")  
-    sg_attr(GetName, "")
-    sg_attr(CheckError, 0))
+    sg_prop(GetPath, "{PATH}")  
+    sg_prop(GetName, "")
+    sg_prop(CheckError, 0))
   
   sg_process(OPEN_PROCESS, "Attempt to open the device\nat the specified path.")
   
@@ -53,25 +53,25 @@ sg_begin()
   sg_branch(TRY_OPEN, CheckAccess(H, W_OK) = ?)   
   
   sg_state(OPEN, Open, 
-    sg_attr(IsOpen,      true)
-    sg_attr(GetPath,     unchanged)
-    sg_attr(GetName,     HID … NAME)
-    sg_attr(GetVendor,   HID … INFO-&gt;vendor)
-    sg_attr(GetProduct,  HID … INFO-&gt;product)
-    sg_attr(CheckError,  = 0))  
+    sg_prop(IsOpen,      true)
+    sg_prop(GetPath,     unchanged)
+    sg_prop(GetName,     HID … NAME)
+    sg_prop(GetVendor,   HID … INFO-&gt;vendor)
+    sg_prop(GetProduct,  HID … INFO-&gt;product)
+    sg_prop(CheckError,  = 0))  
         
   sg_state(CLOSED, Closed,
-    sg_attr(IsOpen,      false)
-    sg_attr(GetPath,     unchanged)
-    sg_attr(GetName,     unchanged)
-    sg_attr(GetVendor,   unchanged)
-    sg_attr(GetProduct,  unchanged)
-    sg_attr(CheckError,  = 0 (always)))  
+    sg_prop(IsOpen,      false)
+    sg_prop(GetPath,     unchanged)
+    sg_prop(GetName,     unchanged)
+    sg_prop(GetVendor,   unchanged)
+    sg_prop(GetProduct,  unchanged)
+    sg_prop(CheckError,  = 0 (always)))  
     
   sg_state(INVALIDATED, Invalidated, 
-    sg_attr(GetPath, "")
-    sg_attr(GetName, "")
-    sg_attr(CheckError, unchanged))   
+    sg_prop(GetPath, "")
+    sg_prop(GetName, "")
+    sg_prop(CheckError, unchanged))   
   
   sg_branch(WRITE_BRANCH, Write succeded?)
   

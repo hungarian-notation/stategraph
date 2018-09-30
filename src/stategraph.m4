@@ -28,6 +28,8 @@ m4_define(<|sg_temporary|>,
 
 sg_temporary(<|edge|>, <||>)
 
+# Header/Footer Macros #########################################################
+
 # These macros form the preamble of a source graph.
 
 m4_define(<|sg_graph|>, <|__sg_graph__|>)
@@ -44,6 +46,12 @@ m4_define(<|sg_begin|>, <|sg_graph { sg_init()|>)
 # Call this macro at the end of the file.
 
 m4_define(<|sg_end|>,   <|}|>)
+  
+# Utility Macros ###############################################################
+  
+m4_define(<|sg_value_of|>, <|m4_ifdef(<|$1|>,<|$3$1$4|>,<|$2|>)|>)
+
+m4_define(<|sg_optional|>, <|m4_ifelse(m4_len(<|$1|>),0,<|$2|>,<|$3$1$4|>)|>)
   
 # This macro is a reusable macro-factory for node generating macros.
 #
@@ -64,7 +72,7 @@ m4_define(<|sg_end|>,   <|}|>)
 #       Returns NODE
 #
 #   __sg_typeof_ID
-#       Returns the second value passed to sg_define_node
+#       Returns the second value passed to sg_define_class
 #
 # For example, if you declare: 
 #   sg_process(SAMPLE, "A Sample Process")
@@ -74,9 +82,9 @@ m4_define(<|sg_end|>,   <|}|>)
 #   __sg_classof_SAMPLE = process
 #   __sg_typeof_SAMPLE  = __sg_type_state__
 
-m4_define(<|sg_define_node|>, 
+m4_define(<|sg_define_class|>, 
   <|m4_define(<|sg_|>|>$1<|<||>, 
-    <|m4_define(<|__sg_classof_|>|><|$|><|1|><|<||>, |>|>$1<|<|)m4_define(<|__sg_typeof_|>|><|$|><|1|><|<||>, |>|>$2<|<|)"|><|$|><|1|><|" [$3]|>)|>)
+    <|m4_define(<|__sg_classof_|>|><|$|><|1|><|<||>, |>|>$1<|<|)m4_define(<|__sg_typeof_|>|><|$|><|1|><|<||>, |>|>$2<|<|)"|><|$|><|1|><|" [sg_value_of(<|__sg_style_$1__|>) $3]|>)|>)
      
 # The following macros are utilites to make accessing the reflective macros
 # defined by a node factory more expressive.
@@ -89,25 +97,25 @@ m4_define(<|sg_classof|>,
     
 # NODES ######################################################################## 
 
-sg_define_node(
+sg_define_class(
   <|process|>,   
   <|__sg_type_state__|>,    
-  <|__sg_style_process__ label=$2|>)
+  <|label=$2|>)
     
-sg_define_node(
+sg_define_class(
   <|reference|>, 
   <|__sg_type_state__|>,    
-  <|__sg_style_reference__ fixedsize=true width=0.5 margin="0.1,0.05" label=<<font face="serif"><b>$2</b></font>>|>)
+  <|fixedsize=true width=0.5 margin="0.1,0.05" label=<<font face="serif"><b>$2</b></font>>|>)
   
-sg_define_node(
+sg_define_class(
   <|branch|>,    
   <|__sg_type_branch__|>,   
-  <|__sg_style_branch__ margin="0.0,0.0" label="$2" height=1 tooltip="$2"|>)
+  <|margin="0.0,0.0" label="$2" height=1 tooltip="$2"|>)
 
-sg_define_node(
+sg_define_class(
   <|state|>,       
   <|__sg_type_state__|>,      
-  <|__sg_style_state__ margin="0.1,0.05" label=
+  <|margin="0.1,0.05" label=
   <<table border="0" cellborder="0" cellpadding="1" cellspacing="1">
     <tr>
       <td cellpadding="3" border="0" colspan="2"><font face="serif"><b>$2</b></font></td>
@@ -115,17 +123,21 @@ sg_define_node(
     $3
   </table>>|>)
   
-sg_define_node(
-  <|merge|>,       
-  
+sg_define_class(
+  <|merge|>,         
   <|__sg_type_merge__|>,      
-  <|label="" shape=point fixedsize=true width=0.005];|>
+  <|label="" shape=point fixedsize=true width=0.0025];|>
   <|"$1" __sg_edgeop__ "$2" [__sg_apply_next_edge__ arrowhead=$3 weight=10 len=0|>)
+  
+sg_define_class(
+  <|anchor|>,         
+  <|__sg_type_anchor__|>,      
+  <|label="" shape=point fixedsize=true width=0.0025|>)
   
 # This macro is used inside the third argument of sg_state(...) macros to
 # declare key-value attributes for that state.
 
-m4_define(<|sg_attr|>,
+m4_define(<|sg_prop|>,
   <|<tr>
       <td align="right"><font face="monospace">$1</font>&nbsp;</td>
       <td align="left"><i>$2</i></td>
