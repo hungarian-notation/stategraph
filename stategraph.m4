@@ -1,12 +1,17 @@
 m4_divert(-1)
+
 m4_changequote(`<|', `|>')
 
 # Configurable Style Macros
 
-m4_include(<|stategraph_styles.m4|>)
-m4_include(<|stategraph_join.m4|>)
+m4_define(<|__sg_style_reference__|>, <|shape=circle     style=filled fillcolor=slategray2|>)
+m4_define(<|__sg_style_state__|>,     <|shape=parallelogram      style=filled fillcolor=snow2|>)
+m4_define(<|__sg_style_branch__|>,    <|shape=diamond    style=solid fillcolor=slategray2|>)
+m4_define(<|__sg_style_process__|>,   <|shape=rectangle  style=solid |>)
 
 # Graph Setup
+
+
 
 m4_define(<|__sg_edgeop__|>,      <|->|>)
 m4_define(<|__sg_graph__|>,           <|digraph|>)
@@ -118,7 +123,7 @@ sg_define_class(
   <|margin="0.1,0.05" label=
   <<table border="0" cellborder="0" cellpadding="1" cellspacing="1">
     <tr>
-      <td cellpadding="3" border="0" colspan="2"><font face="Sans Serif" point-size="14"><b>$2</b></font></td>
+      <td cellpadding="3" border="0" colspan="2"><font face="serif"><b>$2</b></font></td>
     </tr>
     $3
   </table>>|>)
@@ -139,11 +144,10 @@ sg_define_class(
 
 m4_define(<|sg_prop|>,
   <|<tr>
-      <td align="right"><font face="monospace" point-size="12">$1</font>&nbsp;</td>
-      <td align="left"><font face="Sans Serif" point-size="12"><i>$2</i></font></td>
+      <td align="right"><font face="monospace">$1</font>&nbsp;</td>
+      <td align="left"><i>$2</i></td>
     </tr>|>)
-
-
+    
 # Use this to define edges between states. The third argument defines the 
 # label if present.
     
@@ -157,12 +161,6 @@ m4_define(<|sg_edge|>,
 m4_define(<|sg_negate|>, <|sg_next_edge(dir=both arrowtail=odot)|>)
   
 m4_define(<|sg_rank|>, <| subgraph { rank=same; $1 } |>)
-
-# sg_chain creates an invisible constraining link between its arguments. When
-# used on its own, it can specify the position of a list of nodes in the rank
-# direction. When used inside a sg_rank statement, it specifies the ordering
-# of its arguments inside the given rank.
-
-m4_define(<|sg_chain|>, <| sg_join(<|->|>, $@) [style=invis]; |>)
+m4_define(<|sg_chain|>, <| $1 [style=invis]; |>)
   
 m4_divert(0)

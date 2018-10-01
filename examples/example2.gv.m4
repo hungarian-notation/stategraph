@@ -1,10 +1,9 @@
-m4_include(`stategraph.m4')
-
 m4_define(<|__sg_style_redhouse__|>, <|shape=house style=filled fillcolor=red|>)
 
 sg_define_class(<|redhouse|>,,<|label="This is the \N house!" sg_optional($3,, height=",") sg_optional($4,, fillcolor=",")|>)
 
 sg_begin()
+  dpi = 72;  
 
   ordering=out;
 

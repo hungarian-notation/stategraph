@@ -1,8 +1,6 @@
-m4_include(`stategraph.m4')
-
-sg_begin()
-
-
+sg_begin()  
+  dpi = 144;  
+  
   { 
     rank=min; 
     sg_reference(START, Start)
@@ -18,9 +16,8 @@ sg_begin()
   
   sg_process(FREE_PROCESS, "FreeHandle() releases any resources and\nfrees the memory used by\nthe handle on the heap.")
   
-  sg_reference(ERR_IO, Error)
-  
-  sg_reference(ERR_IO, Error)
+  sg_reference(OPEN_ERROR, Error)  
+  sg_reference(WRITE_ERROR, Error)
       
   sg_state(RESET, Reset, 
     sg_prop(GetPath, "")
@@ -77,31 +74,30 @@ sg_begin()
   
   # RANKINGS
   
-  sg_rank(START; ANY_RESET; ANY_INVALIDATE; ANY_END;)
+  sg_anchor(SPACER_0)
   
-  sg_rank(sg_chain(RESET_1->RESET->RESET_2->INVALIDATED))
+  sg_rank(START; ANY_RESET; ANY_INVALIDATE; ANY_END;)  
+  sg_rank(sg_chain(RESET_1->RESET_2->INVALIDATED))  
+  sg_rank(PREPARE_PROCESS)  
+  sg_rank(sg_chain(PREPARED_PATH->PREPARED_INDEX))  
+  sg_rank(TRY_OPEN)
+  sg_rank(OPEN_PROCESS REOPEN_PROCESS FREE_PROCESS)  
+  sg_rank(sg_chain(OPEN->CLOSED))  
+  sg_rank(END rank=sink;)
   
-  sg_rank(sg_chain(PREPARE_PROCESS->REUSE_PREPARE))
-  
-  sg_rank(sg_chain(PREPARED_PATH->PREPARED_INDEX))
-  
-  sg_rank(sg_chain(OPEN_PROCESS->REOPEN_PROCESS) FREE_PROCESS)
-  
-  sg_rank(sg_chain(TRY_OPEN->OPEN->CLOSED))
-  
-  sg_rank(nodesep=10; sg_chain(ERR_IO->WRITE_BRANCH) END; rank=sink;)
+  sg_chain(PREPARED_INDEX->REOPEN_PROCESS)
   
   # BRANCH CHOICES 
   
   sg_next_edge(tailport=se)
     sg_edge(TRY_OPEN, OPEN, "ok")  
   sg_negate() sg_next_edge(tailport=sw weight=10)
-    sg_edge(TRY_OPEN, ERR_IO, "not ok")
+    sg_edge(TRY_OPEN, OPEN_ERROR, "not ok")
   
-  sg_next_edge(constrain=false tailport=e headport=se)
+  sg_next_edge(headport=se)
     sg_edge(WRITE_BRANCH, OPEN, "yes")      
-  sg_negate()
-    sg_edge(WRITE_BRANCH, ERR_IO, "no")
+  sg_negate() sg_next_edge(tailport=sw tailclip=false)
+    sg_edge(WRITE_BRANCH, WRITE_ERROR, "no")
   
   sg_edge(START, RESET_1, "AllocateHandle()")   
   sg_edge(RESET_1, RESET)
@@ -115,15 +111,17 @@ sg_begin()
   
   sg_next_edge(headport=n)
   sg_edge(PREPARED_PATH, OPEN_PROCESS, "Open()") 
+  
   sg_next_edge(headport=ne)
   sg_edge(PREPARED_INDEX, OPEN_PROCESS, "Open()")  
   
   sg_next_edge(tailport=w headport=n)
   sg_edge(OPEN_PROCESS, TRY_OPEN)
   
-  sg_next_edge(tailport=w headport=e)
+  sg_next_edge(constraint=false)
   sg_edge(REOPEN_PROCESS, OPEN_PROCESS)
   
+  sg_next_edge(tailport=sw)
   sg_edge(OPEN, WRITE_BRANCH, "WriteFeature(...)\nWriteOutput(...)")  
     
   # Closing and Reuse
@@ -132,13 +130,12 @@ sg_begin()
   sg_edge(OPEN, CLOSED, "Close()")
   
   
-  sg_next_edge(constrain=false)
   sg_edge(CLOSED, REOPEN_PROCESS, "Open()")
   
-  sg_next_edge(constrain=false)
+  sg_next_edge()
   sg_edge(CLOSED, REUSE_PREPARE, "PrepareFromIndex(int)\nPrepareFromPath(const char*)")
   
-  sg_next_edge(constrain=false)
+  sg_next_edge()
   sg_edge(REUSE_PREPARE, PREPARE_PROCESS)
   
   # Invalidate VS Reset

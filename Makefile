@@ -37,28 +37,37 @@ srcdir 							?= .
 
 # NON-STANDARD:
 
+stategraph_SOURCES  := stategraph.m4 stategraph_styles.m4
+stategraph_LIB			:= stategraph.m4f
+
 examplesdir					:= $(srcdir)/../examples
+
 example_SOURCES			:= $(notdir $(wildcard $(examplesdir)/*.gv.m4))
 example_GVS					:= $(example_SOURCES:.gv.m4=.gv)
 example_PNGS				:= $(example_SOURCES:.gv.m4=.png)
 
-VPATH               := .:$(srcdir):$(examplesdir)
+vpath %.gv.m4 $(examplesdir)
+vpath %.m4 $(srcdir)
+
+.SUFFIXES += .gv.m4 .m4
 
 ### OUTPUTS ####################################################################
 
-built_files					:= 
+built_files					:= $(stategraph_LIB)
 build_patterns			:= *.gv *.png
 build_dirs					:= $(util_searcher)
+all_built						:= $(built_files) $(wildcard $(call util_cross,$(build_dirs),$(build_patterns),/))
 
-all_built						:= $(wildcard $(call util_cross,$(build_dirs),$(build_patterns),/))
+%.m4f: %.m4 
+	$(M4) -I"$(srcdir)" -P $< -F $@
 
-%.gv: %.gv.m4
-	$(M4) -I"$(srcdir)" -P $< > $@
+%.gv: %.gv.m4 $(stategraph_LIB)
+	$(M4) -R $(stategraph_LIB) -P $< > $@
 
-%.png: %.gv
+%.png: %.gv 
 	$(DOT) -Tpng $< > $@	
 
-all: examples
+all: examples $(stategraph_LIB)
 
 examples: $(example_GVS) $(example_PNGS)
 
@@ -74,11 +83,9 @@ list_all_built:
 clean:
 	rm -rf $(all_built)
 
-distclean:
-	@echo "not configured (target: $@)"
+distclean: clean
 
-mostlyclean:
-	@echo "not configured (target: $@)"
+mostlyclean: clean
 
 check:
 	@echo "not configured (target: $@)"
